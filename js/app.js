@@ -1,6 +1,28 @@
+'use strict';
+//Constants
+var ENEMY_INIT_X = -200;
+var PLAYER_INIT_X = 225;
+var PLAYER_INIT_Y = 570;
+var CTX_WIDTH = 505;
+
+var PLAYER_MIN_Y = 60;
+var PLAYER_MAX_Y = 580;
+var PLAYER_MIN_X = 10;
+var PLAYER_MAX_X = 440;
+
+var PLAYER_WIDTH = 45;
+var PLAYER_HEIGHT = 55;
+var ENEMY_WIDTH = 60;
+var ENEMY_HEIGHT = 39;
+
+var ENEMY_SPRITE = 'images/enemy-bug.png';
+
+
 // Enemies our player must avoid
 var allEnemies = [];
 var enemySpeed = 30;
+var allCharacters = [];
+
 
 /**
 * @description Enemies
@@ -33,15 +55,14 @@ Enemy.prototype.update = function(dt) {
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
 	ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-	console.log(this.speed);
 };
 
 Enemy.prototype.collisionDetector = function(player){
-	if (this.x < player.x + 45 &&
-		this.x + 60 > player.x &&
-		this.y < player.y + 55 &&
-		39 + this.y > player.y) {
-		console.log("enemy collision detected");
+	if (this.x < player.x + PLAYER_WIDTH &&
+		this.x + ENEMY_WIDTH > player.x &&
+		this.y < player.y + PLAYER_HEIGHT &&
+		ENEMY_HEIGHT + this.y > player.y) {
+
 		player.reset();
 
 		//Erase one life instance
@@ -52,24 +73,10 @@ Enemy.prototype.collisionDetector = function(player){
 //Reuse enemies already created by setting new x positions
 //once their x position is greater than the canvace's width
 Enemy.prototype.reset = function(){
-	if(this.x > 505){
-		this.x = -150;
+	if(this.x > CTX_WIDTH){
+		this.x = ENEMY_INIT_X ;
 	}
 };
-
-function createEnemies(){
-	//Arrays determining possible x and y positions for the enemies
-	this.yPos = [220, 270, 320, 420];
-	this.xPos = [-300,-200,-100, 0, 100, 200];
-
-
-	for (var i = 0; i < 15; i++) {
-		//Choosing randon x and y positions for every instance of enemy
-		this.randY = this.yPos[Math.floor(Math.random() * this.yPos.length)];
-		this.randX = this.xPos[Math.floor(Math.random() * this.xPos.length)];
-		allEnemies.push(new Enemy(this.randX, this.randY, enemySpeed));
-	}
-}
 
 // Now write your own player class
 // This class requires an update(), render() and
@@ -89,17 +96,17 @@ var Player = function(x, y){
 
 Player.prototype.update = function(dt){
 	//Setting player's boundaries
-	if(this.y < 60){
-		this.y = 60;
+	if(this.y < PLAYER_MIN_Y){
+		this.y = PLAYER_MIN_Y;
 	}
-	if(this.y > 580){
-		this.y = 580;
+	if(this.y > PLAYER_MAX_Y){
+		this.y = PLAYER_MAX_Y;
 	}
-	if(this.x < 10){
-		this.x = 10;
+	if(this.x < PLAYER_MIN_X){
+		this.x = PLAYER_MIN_X;
 	}
-	if(this.x > 440){
-		this.x = 440;
+	if(this.x > PLAYER_MAX_X){
+		this.x = PLAYER_MAX_X;
 	}
 };
 
@@ -134,14 +141,14 @@ Player.prototype.render = function(){
 };
 
 Player.prototype.reset = function(){
-	this.x = 225;
-	this.y = 570;
+	this.x = PLAYER_INIT_X;
+	this.y = PLAYER_INIT_Y;
 };
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
-var player = new Player(225, 570);
+var player = new Player(PLAYER_INIT_X, PLAYER_INIT_Y);
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
@@ -173,8 +180,8 @@ var allLife = [];
 
 //Create life instances
 function createLife(){
-	xPos = [410, 440, 470];
-	yPos = 65;
+	var xPos = [410, 440, 470];
+	var yPos = 65;
 
 	for(var i = 0; i < 3; i++){
 		allLife.push(new Life(xPos[i], yPos));
@@ -216,8 +223,8 @@ Gem.prototype.render = function(){
 
 //Create gem holders and level gems
 function createGems(){
-	xPos = [15, 45, 75];
-	yPos = 60;
+	var xPos = [15, 45, 75];
+	var yPos = 60;
 	for (var i = 0; i <= 3; i++) {
 		smallGemHolders.push(new Gem(allGems[0], xPos[i], yPos, 25, 25));
 		bigGems.push(new Gem(allGems[i+1], 230, 125, 50, 50));
@@ -228,31 +235,6 @@ createGems();
 
 //Variable to control if enemies have been created
 var enemyCount = 0;
-
-//Collition detector for big gems
-function bigGemCollision(player){
-	for(var i = 0; i <= 3; i++){
-		if (bigGems[i].x < player.x + 45 &&
-			bigGems[i].x + 40 > player.x &&
-			bigGems[i].y < player.y + 55 &&
-			40 + bigGems[i].y > player.y) {
-				console.log("gem collision detected");
-
-				//Send player to initial position
-				player.reset();
-
-				//Level up
-				currentLevel += 1;
-
-				//Increase enemy speed
-				enemySpeed += 15;
-
-				//reset enemies array an enemy count
-				allEnemies = [];
-				enemyCount = 0;
-		}
-	}
-}
 
 //Level text screen class
 var levelText = ["Level 1", "Level 2", "Level 3", "Game Over", "You Win!"];
@@ -296,14 +278,6 @@ function createLevelScreens(){
 }
 createLevelScreens();
 
-//Function to create new enemies only once on each level
-function drawEnemies(){
-	if(enemyCount === 0){
-		console.log("drawEnemies");
-		createEnemies();
-		enemyCount = 1;
-	}
-}
 
 //Var to keep track of the current level
 var currentLevel = 1;
@@ -319,15 +293,55 @@ var Level = function(levelGem, level){
 	this.gem = levelGem;
 };
 
+Level.prototype.bigGemCollision = function(player){
+	for(var i = 0; i <= 3; i++){
+		if (bigGems[i].x < player.x + 45 &&
+			bigGems[i].x + 40 > player.x &&
+			bigGems[i].y < player.y + 55 &&
+			40 + bigGems[i].y > player.y) {
+
+				//Send player to initial position
+				player.reset();
+
+				//Level up
+				currentLevel += 1;
+
+				//Increase enemy speed
+				enemySpeed += 15;
+
+				//reset enemies array an enemy count
+				allEnemies = [];
+				enemyCount = 0;
+		}
+	}
+}
+
+Level.prototype.drawEnemies = function (){
+	if(enemyCount === 0){
+
+		var yPos = [220, 270, 320, 420];
+		var xPos = [-350,-250,-150, 0, 150, 250];
+
+
+		for (var i = 0; i < 15; i++) {
+			//Choosing randon x and y positions for every instance of enemy
+			var randY = yPos[Math.floor(Math.random() * yPos.length)];
+			var randX = xPos[Math.floor(Math.random() * xPos.length)];
+			allEnemies.push(new Enemy(randX, randY, enemySpeed));
+		}
+
+		enemyCount = 1;
+	}
+}
+
 Level.prototype.render = function(){
 	this.gem.render();
-	bigGemCollision(player);
-	drawEnemies();
+	this.bigGemCollision(player);
+	this.drawEnemies();
 	if(lmessages.length > 0){
 		this.levelText.render();
 	}
 };
-
 
 var level1 = new Level(bigGems[0], lmessages[0]);
 var level2 = new Level(bigGems[1], lmessages[1]);
@@ -349,14 +363,18 @@ function levelRender(){
 		else if(currentLevel === 4){
 			//The player has won the game
 			smallGemHolders.splice(2, 1, smallGems[2]);
+			endMessages[1].render();//You win message
+
+			//reset arrays need to stop enemies and big gems from renderin
 			allEnemies = [];
 			lmessages = [];
-			endMessages[1].render();//You win message
 		}
 
 		if(allLife.length < 1){
 			//The player has lost the game
 			endMessages[0].render();
+
+			//reset arrays and variable needed to stop enemies and big gems from rendering
 			allEnemies = [];
 			lmessages = [];
 			currentLevel = 0;
